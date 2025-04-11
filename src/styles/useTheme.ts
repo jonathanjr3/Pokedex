@@ -1,4 +1,3 @@
-// src/styles/useTheme.ts
 import { useColorScheme } from 'react-native';
 import { darkColors, lightColors, ColorPalette } from './colors';
 

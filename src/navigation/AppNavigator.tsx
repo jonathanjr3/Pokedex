@@ -7,11 +7,6 @@ import type { RootStackParamList } from './types';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
-function capitalizeFirstLetter(string: string): string {
-  return string.charAt(0).toUpperCase() + string.slice(1);
-}
-
-
 const AppNavigator: React.FC = () => {
   const theme = useTheme();
 
@@ -37,9 +32,6 @@ const AppNavigator: React.FC = () => {
       <Stack.Screen
         name="PokemonDetail"
         component={PokemonDetailScreen}
-        options={({ route }) => ({
-          title: capitalizeFirstLetter(route.params.pokemonName),
-        })}
       />
     </Stack.Navigator>
   );
