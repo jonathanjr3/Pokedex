@@ -32,9 +32,9 @@ const PokemonHeader: React.FC<Props> = ({ pokemon, isLandscape }) => {
       headerStyle
     ]}>
       {mainSprite ? (
-        <Image style={styles.mainSprite} source={{ uri: mainSprite }} resizeMode="contain" />
+        <Image style={isLandscape ? styles.mainSpriteLandscape : styles.mainSpritePortrait} source={{ uri: mainSprite }} resizeMode="contain" />
       ) : (
-        <View style={[styles.mainSprite, styles.spritePlaceholder]}>
+        <View style={[isLandscape ? styles.mainSpriteLandscape : styles.mainSpritePortrait, styles.spritePlaceholder]}>
           <Text style={textStyle}>?</Text>
         </View>
       )}
@@ -74,6 +74,7 @@ const PokemonHeader: React.FC<Props> = ({ pokemon, isLandscape }) => {
 const styles = StyleSheet.create({
   headerSection: {
     alignItems: 'center',
+    paddingTop: 10,
   },
   headerSectionLandscape: {
     justifyContent: 'center',
@@ -81,9 +82,13 @@ const styles = StyleSheet.create({
     marginVertical: 15,
     height: "100%",
   },
-  mainSprite: {
+  mainSpritePortrait: {
     width: 150,
     height: 150,
+  },
+  mainSpriteLandscape: {
+    width: 120,
+    height: 120,
   },
   spritePlaceholder: {
     justifyContent: 'center',
