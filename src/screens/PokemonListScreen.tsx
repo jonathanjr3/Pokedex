@@ -44,7 +44,7 @@ const PokemonListScreen: React.FC = () => {
     const [loadingPageDetails, setLoadingPageDetails] = useState<boolean>(false); // Loading details for a page
     const [error, setError] = useState<string | null>(null);
     const [currentPage, setCurrentPage] = useState<number>(0); // Current page index for detail fetching
-    const [canLoadMoreDetails, setCanLoadMoreDetails] = useState<boolean>(false); // Can we load details for the next page?
+    const [canLoadMoreDetails, setCanLoadMoreDetails] = useState<boolean>(false);
     const [searchQuery, setSearchQuery] = useState<string>('');
 
     // Refs
@@ -124,10 +124,9 @@ const PokemonListScreen: React.FC = () => {
             padding: 2,
         },
     });
-    // Assign to constants for easier use in JSX
     const backgroundStyle = styles.background;
     const containerStyle = styles.container;
-    const textColor = { color: theme.text }; // Can keep this simple helper if only used for text
+    const textColor = { color: theme.text };
 
     // --- Search and Filtering Logic --- 
     const filteredPokemonNames = useMemo(() => {
@@ -178,8 +177,6 @@ const PokemonListScreen: React.FC = () => {
 
     // Fetch details for a specific page based on the *provided* name list (filtered or full)
     const fetchPokemonDetailsForPage = useCallback(async (page: number, namesList: NamedAPIResource[], isRetry: boolean = false) => {
-        // Check loading state directly, don't rely on it being a dependency
-        // if (!isRetry && loadingPageDetails) return; 
 
         const startIndex = page * DETAILS_PAGE_LIMIT;
         const endIndex = startIndex + DETAILS_PAGE_LIMIT;
@@ -200,9 +197,6 @@ const PokemonListScreen: React.FC = () => {
 
         console.log(`Fetching details for page ${page} (indices ${startIndex}-${endIndex - 1}). Count: ${namesToFetch.length}`);
         setLoadingPageDetails(true);
-        // We should clear the specific 'load more' error when attempting a new page fetch
-        // but maybe not the initial load error if page === 0?
-        // Let's clear it for now for simplicity.
         setError(null);
 
         let pageFetchSuccess = false; // Track success for state updates
@@ -240,14 +234,12 @@ const PokemonListScreen: React.FC = () => {
                 }
             }
         }
-        // Remove dependencies - relies on arguments and checks state inside
     }, []);
 
     // --- Recalculate pagination based on filtered list OR when search is cleared --- 
     useEffect(() => {
         // Only run AFTER initial load (names + page 0) is fully complete
         if (!initialLoadComplete.current) {
-            // console.log("Search effect skipped: Initial load not complete.");
             return;
         }
 
@@ -282,8 +274,7 @@ const PokemonListScreen: React.FC = () => {
         setError(null);
         setDisplayedPokemon([]);
         setCurrentPage(0);
-        // Ensure search is also cleared on initial load/retry
-        // setSearchQuery(''); // Optional: Clear search on initial load?
+        setSearchQuery('');
         allPokemonNamesRef.current = [];
 
         try {
@@ -329,7 +320,6 @@ const PokemonListScreen: React.FC = () => {
     const numColumns = calculateNumColumns();
 
     // --- Event Handlers --- 
-    // Wrap handleLoadMore in useCallback
     const handleLoadMore = useCallback(() => {
         // Add log to see what currentPage it's using
         console.log(`handleLoadMore triggered. Current Page: ${currentPage}, Can Load More: ${canLoadMoreDetails}, Loading Details: ${loadingPageDetails}, Loading Initial: ${loadingInitialList}`);
@@ -343,7 +333,7 @@ const PokemonListScreen: React.FC = () => {
                 fetchPokemonDetailsForPage(currentPage, listToPaginate);
             } else {
                 console.log("handleLoadMore: Calculated that no more items exist for the current list.");
-                setCanLoadMoreDetails(false); // Correctly set based on calculation
+                setCanLoadMoreDetails(false);
             }
         }
         // dependencies, include things that determine *which* list to use or *if* loading can happen
@@ -441,7 +431,6 @@ const PokemonListScreen: React.FC = () => {
     return (
         <SafeAreaView style={backgroundStyle}>
             <View style={containerStyle}>
-                {/* Updated Search Input Area */}
                 <View style={styles.searchInputContainer}>
                     <Icon
                         name="search"
@@ -472,7 +461,7 @@ const PokemonListScreen: React.FC = () => {
 
                 <FlashList
                     numColumns={numColumns}
-                    data={displayedPokemon} // Display the detailed pokemon from current pages
+                    data={displayedPokemon}
                     renderItem={renderItem}
                     keyExtractor={(item) => item.id.toString()}
                     estimatedItemSize={220}
