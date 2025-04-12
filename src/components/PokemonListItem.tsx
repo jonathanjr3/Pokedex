@@ -1,14 +1,12 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   Image,
-  ActivityIndicator,
   TouchableOpacity
 } from 'react-native';
-import type { NamedAPIResource, Pokemon, PokemonType } from 'pokenode-ts';
-import apiClient from '../api/PokeClient';
+import type { Pokemon, PokemonType } from 'pokenode-ts';
 import { useTheme } from '../styles/useTheme';
 import { useNavigation } from '@react-navigation/native';
 import type { PokemonListNavigationProp } from '../navigation/types';
@@ -16,46 +14,19 @@ import { getPokemonTypeColor } from '../utils/PokemonTypeColors';
 import { formatName } from '../utils/StringHelpers';
 
 interface Props {
-  item: NamedAPIResource;
+  pokemon: Pokemon;
 }
 
-const PokemonListItem: React.FC<Props> = ({ item }) => {
-  const [pokemonDetails, setPokemonDetails] = useState<Pokemon | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<boolean>(false);
-
+const PokemonListItem: React.FC<Props> = ({ pokemon }) => {
   const theme = useTheme();
   const navigation = useNavigation<PokemonListNavigationProp>();
 
-  useEffect(() => {
-    const fetchDetails = async () => {
-      // Reset state for potentially recycled component instances in FlashList
-      setLoading(true);
-      setError(false);
-      setPokemonDetails(null); // Clear previous details
-      try {
-        const details = await apiClient.getPokemonByName(item.name);
-        setPokemonDetails(details);
-      } catch (err) {
-        console.error(`Failed to fetch details for ${item.name}:`, err);
-        setError(true);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchDetails();
-  }, [item.name]); // Depend only on item.name
-
   const handlePress = useCallback(() => {
-    if (pokemonDetails) {
-      navigation.navigate('PokemonDetail', { pokemon: pokemonDetails });
-    }
-  }, [navigation, pokemonDetails]);
+    navigation.navigate('PokemonDetail', { pokemon: pokemon });
+  }, [navigation, pokemon]);
 
-  // Use official artwork if available, fallback to front_default
-  const spriteUri = pokemonDetails?.sprites?.other?.['official-artwork']?.front_default
-    ?? pokemonDetails?.sprites?.front_default;
+  const spriteUri = pokemon.sprites?.other?.['official-artwork']?.front_default
+    ?? pokemon.sprites?.front_default;
 
   const cardStyle = {
     backgroundColor: theme.card,
@@ -63,14 +34,9 @@ const PokemonListItem: React.FC<Props> = ({ item }) => {
   const textStyle = { color: theme.text };
   const mutedTextStyle = { color: theme.text, opacity: 0.6 }; // For ID
 
-  // Component to render the sprite area (handling loading/error)
-  const renderSpriteArea = () => {
-    if (loading) {
-      return <ActivityIndicator style={styles.sprite} size="small" color={theme.primary} />;
-    }
-    if (error || !spriteUri) {
-      // Simple placeholder for error or missing sprite
-      return <View style={[styles.sprite, styles.spritePlaceholder]}><Text>!</Text></View>;
+  const renderSprite = () => {
+    if (!spriteUri) {
+      return <View style={[styles.sprite, styles.spritePlaceholder]}><Text style={styles.placeholderText}>?</Text></View>;
     }
     return (
       <Image
@@ -85,53 +51,34 @@ const PokemonListItem: React.FC<Props> = ({ item }) => {
     <TouchableOpacity
       style={[styles.container, cardStyle]}
       onPress={handlePress}
-      disabled={loading || error || !pokemonDetails} // Prevent navigation until ready
-      activeOpacity={0.7} // Standard touch feedback
+      activeOpacity={0.7}
     >
-      {/* ID Text */}
-      {pokemonDetails && ( // Only show ID when details are loaded
-        <Text style={[styles.idText, mutedTextStyle]}>
-          #{pokemonDetails.id.toString().padStart(4, '0')} {/* Pad to 4 digits */}
-        </Text>
-      )}
-
-      {/* Sprite Area */}
-      <View style={styles.spriteContainer}>
-        {renderSpriteArea()}
-      </View>
-
-      {/* Name Text */}
-      <Text style={[styles.nameText, textStyle]} numberOfLines={1} ellipsizeMode="tail">
-        {formatName(item.name)}
+      <Text style={[styles.idText, mutedTextStyle]}>
+        #{pokemon.id.toString().padStart(4, '0')}
       </Text>
 
-      {/* Types Container */}
-      {pokemonDetails && ( // Only show types when details are loaded
-        <View style={styles.typesContainer}>
-          {pokemonDetails.types.map((typeInfo: PokemonType) => {
-            const typeName = typeInfo.type.name;
-            const typeColor = getPokemonTypeColor(typeName);
-            // const textColor = parseInt(typeColor.substring(1), 16) > 0x888888 ? theme.text : theme.card;
-            const textColor = theme.card;
+      <View style={styles.spriteContainer}>
+        {renderSprite()}
+      </View>
 
-            return (
-              <View key={typeName} style={[styles.typeBadge, { backgroundColor: typeColor }]}>
-                <Text style={[styles.typeText, { color: textColor }]}>
-                  {formatName(typeName)}
-                </Text>
-              </View>
-            );
-          })}
-        </View>
-      )}
+      <Text style={[styles.nameText, textStyle]} numberOfLines={1} ellipsizeMode="tail">
+        {formatName(pokemon.name)}
+      </Text>
 
-      {/* Show loading/error indicator subtly if details aren't ready */}
-      {(error && !pokemonDetails) && (
-        <View style={styles.loadingOverlay}>
-          <Text>!</Text>
-        </View>
-      )}
-
+      <View style={styles.typesContainer}>
+        {pokemon.types.map((typeInfo: PokemonType, index: number) => {
+          const typeName = typeInfo.type.name;
+          const typeColor = getPokemonTypeColor(typeName);
+          const textColor = theme.card;
+          return (
+            <View key={index} style={[styles.typeBadge, { backgroundColor: typeColor }]}>
+              <Text style={[styles.typeText, { color: textColor }]}>
+                {formatName(typeName)}
+              </Text>
+            </View>
+          );
+        })}
+      </View>
     </TouchableOpacity>
   );
 };
@@ -175,11 +122,16 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
+    width: '100%',
+    height: '100%',
+  },
+  placeholderText: {
+    fontSize: 30,
+    color: 'rgba(0,0,0,0.2)',
   },
   nameText: {
     fontSize: 15,
     fontWeight: 'bold',
-    textTransform: 'capitalize',
     textAlign: 'center',
     marginBottom: 8,
   },
@@ -199,24 +151,7 @@ const styles = StyleSheet.create({
   typeText: {
     fontSize: 10,
     fontWeight: 'bold',
-    textTransform: 'uppercase',
   },
-  errorText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#888',
-  },
-  loadingOverlay: { // Covers the card content while loading/error before details arrive
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(128, 128, 128, 0.1)',
-    borderRadius: 12,
-  }
 });
 
-export default PokemonListItem;
+export default React.memo(PokemonListItem);
