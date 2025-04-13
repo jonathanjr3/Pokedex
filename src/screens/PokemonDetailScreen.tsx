@@ -53,7 +53,7 @@ const PokemonDetailScreen: React.FC<Props> = ({ route, navigation }) => {
       try {
         console.log(`Fetching species and type data for: ${pokemon.name}`);
         const [speciesData, ...fetchedTypesData] = await Promise.all([
-          apiClient.getPokemonSpeciesByName(pokemon.name),
+          apiClient.getPokemonSpeciesById(pokemon.id),
           ...pokemon.types.map(typeInfo => apiClient.getTypeByName(typeInfo.type.name))
         ]);
 
