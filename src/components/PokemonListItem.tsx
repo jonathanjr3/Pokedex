@@ -7,7 +7,7 @@ import {
   TouchableOpacity
 } from 'react-native';
 import type { Pokemon, PokemonType } from 'pokenode-ts';
-import { useTheme } from '../styles/useTheme';
+import { useTheme } from '../hooks/useTheme';
 import { useNavigation } from '@react-navigation/native';
 import type { PokemonListNavigationProp } from '../navigation/types';
 import { getPokemonTypeColor } from '../utils/PokemonTypeColors';

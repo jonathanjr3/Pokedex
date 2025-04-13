@@ -1,8 +1,8 @@
-import React from 'react';
+import type React from 'react';
 import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
 import { useColorScheme, StatusBar } from 'react-native';
 import AppNavigator from './src/navigation/AppNavigator';
-import { useTheme } from './src/styles/useTheme';
+import { useTheme } from './src/hooks/useTheme';
 import { lightColors, darkColors } from './src/styles/colors';
 
 const MyLightTheme = {

@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import type React from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import {
     View,
     Text,
@@ -14,7 +15,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FlashList } from '@shopify/flash-list';
 import type { Pokemon, NamedAPIResource } from 'pokenode-ts';
 import apiClient from '../api/PokeClient';
-import { useTheme } from '../styles/useTheme';
+import { useTheme } from '../hooks/useTheme';
 import PokemonListItem from '../components/PokemonListItem';
 import { useDebounce } from '../hooks/useDebounce';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -31,7 +32,7 @@ const extractIdFromUrl = (url: string): number | null => {
     try {
         const parts = url.split('/').filter(Boolean);
         const id = parts.pop();
-        return id ? parseInt(id, 10) : null;
+        return id ? Number.parseInt(id, 10) : null;
     } catch (e) {
         return null;
     }
@@ -137,8 +138,8 @@ const PokemonListScreen: React.FC = () => {
             return allNames; // Return all if query is empty
         }
 
-        const queryAsNumber = parseInt(query, 10);
-        const isNumericQuery = !isNaN(queryAsNumber);
+        const queryAsNumber = Number.parseInt(query, 10);
+        const isNumericQuery = !Number.isNaN(queryAsNumber);
         let exactMatch: NamedAPIResource | null = null;
 
         const filtered = allNames.filter(pokemon => {
@@ -166,8 +167,8 @@ const PokemonListScreen: React.FC = () => {
                 if (a === exactMatch) return -1; // Exact match comes first
                 if (b === exactMatch) return 1;
             }
-            const idA = extractIdFromUrl(a.url) ?? Infinity;
-            const idB = extractIdFromUrl(b.url) ?? Infinity;
+            const idA = extractIdFromUrl(a.url) ?? Number.POSITIVE_INFINITY;
+            const idB = extractIdFromUrl(b.url) ?? Number.POSITIVE_INFINITY;
             return idA - idB;
         });
 
@@ -176,7 +177,7 @@ const PokemonListScreen: React.FC = () => {
     // --- Data Fetching Logic --- 
 
     // Fetch details for a specific page based on the *provided* name list (filtered or full)
-    const fetchPokemonDetailsForPage = useCallback(async (page: number, namesList: NamedAPIResource[], isRetry: boolean = false) => {
+    const fetchPokemonDetailsForPage = useCallback(async (page: number, namesList: NamedAPIResource[], isRetry = false) => {
 
         const startIndex = page * DETAILS_PAGE_LIMIT;
         const endIndex = startIndex + DETAILS_PAGE_LIMIT;
@@ -226,7 +227,7 @@ const PokemonListScreen: React.FC = () => {
         } finally {
             setLoadingPageDetails(false);
             if (page === 0) {
-                console.log(`Finished processing page 0. Setting initialLoadComplete to true.`);
+                console.log("Finished processing page 0. Setting initialLoadComplete to true.");
                 setLoadingInitialList(false);
                 initialLoadComplete.current = true; // Mark initial load as complete
                 if (!pageFetchSuccess) {
@@ -321,9 +322,6 @@ const PokemonListScreen: React.FC = () => {
 
     // --- Event Handlers --- 
     const handleLoadMore = useCallback(() => {
-        // Add log to see what currentPage it's using
-        console.log(`handleLoadMore triggered. Current Page: ${currentPage}, Can Load More: ${canLoadMoreDetails}, Loading Details: ${loadingPageDetails}, Loading Initial: ${loadingInitialList}`);
-
         if (canLoadMoreDetails && !loadingPageDetails) {
             console.log("handleLoadMore: Fetching next page details for filtered list.");
             const listToPaginate = debouncedSearchQuery
@@ -435,13 +433,13 @@ const PokemonListScreen: React.FC = () => {
                     <Icon
                         name="search"
                         size={20}
-                        color={theme.text + '80'}
+                        color={`${theme.text}80`}
                         style={styles.searchIcon}
                     />
                     <TextInput
                         style={styles.searchInput}
                         placeholder="Search by Name or Pokédex Number"
-                        placeholderTextColor={theme.text + '80'}
+                        placeholderTextColor={`${theme.text}80`}
                         value={searchQuery}
                         onChangeText={setSearchQuery}
                         autoCapitalize="none"
@@ -452,7 +450,7 @@ const PokemonListScreen: React.FC = () => {
                             <Icon
                                 name="cancel"
                                 size={20}
-                                color={theme.text + '80'}
+                                color={`${theme.text}80`}
                                 style={styles.clearIcon}
                             />
                         </TouchableOpacity>

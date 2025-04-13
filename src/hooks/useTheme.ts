@@ -1,5 +1,5 @@
 import { useColorScheme } from 'react-native';
-import { darkColors, lightColors, ColorPalette } from './colors';
+import { darkColors, lightColors, type ColorPalette } from '../styles/colors';
 
 export const useTheme = (): ColorPalette => {
   const scheme = useColorScheme();
