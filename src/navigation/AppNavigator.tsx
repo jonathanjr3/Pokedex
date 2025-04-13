@@ -1,6 +1,6 @@
-import React from 'react';
+import type React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { useTheme } from '../styles/useTheme';
+import { useTheme } from '../hooks/useTheme';
 import PokemonListScreen from '../screens/PokemonListScreen';
 import PokemonDetailScreen from '../screens/PokemonDetailScreen';
 import type { RootStackParamList } from './types';
