@@ -1,11 +1,14 @@
-import type React from "react";
-import { View, Text, Image, StyleSheet } from "react-native";
-import type { Pokemon } from "pokenode-ts";
-import { useTheme } from "../hooks/useTheme";
-import { formatName } from "../utils/StringHelpers";
-import { getPokemonTypeColor } from "../utils/PokemonTypeColors";
-import LinearGradient from "react-native-linear-gradient";
 import { BlurView } from "@react-native-community/blur";
+import type { Pokemon } from "pokenode-ts";
+import type React from "react";
+import { Image, StyleSheet, Text, View } from "react-native";
+import LinearGradient from "react-native-linear-gradient";
+import { useTheme } from "../hooks/useTheme";
+import {
+	getPokemonTypeColor,
+} from "../utils/PokemonTypeColors";
+import { formatName } from "../utils/StringHelpers";
+import { TypeBadge } from "./PokemonTypeBadge";
 
 interface Props {
 	pokemon: Pokemon;
@@ -30,21 +33,11 @@ const PokemonHeader: React.FC<Props> = ({
 	};
 	const textStyle = { color: theme.text };
 	const textMutedStyle = { color: theme.text, opacity: 0.7 };
-	const typeTextStyle = { color: theme.card };
 
-	// Calculate type details (name and color) once
-	const typeDetails = pokemon.types.map((typeInfo) => ({
-		name: typeInfo.type.name,
-		color: getPokemonTypeColor(typeInfo.type.name),
-	}));
+	const typeHexColors = pokemon.types
+		.map((typeInfo) => getPokemonTypeColor(typeInfo.type.name))
+		.filter((color): color is string => !!color);
 
-	// --- New Gradient Logic ---
-	// Get just the hex colors for the gradient
-	const typeHexColors = typeDetails
-		.map((detail) => detail.color)
-		.filter((color): color is string => !!color); // Filter out null/undefined
-
-	// Start gradient with species color (or primary fallback)
 	const baseGradientColor = speciesHexColor ?? theme.primary;
 
 	// Combine species color with type colors
@@ -62,7 +55,6 @@ const PokemonHeader: React.FC<Props> = ({
 		// Final fallback if duplicates made it too short
 		calculatedGradientColors = [theme.primary, theme.skeletonHighlight];
 	}
-	// --- End New Gradient Logic ---
 
 	const blurType = theme.background === "#000000" ? "dark" : "light";
 
@@ -111,28 +103,15 @@ const PokemonHeader: React.FC<Props> = ({
 					#{pokemon.id.toString().padStart(3, "0")}
 				</Text>
 				<View style={styles.typesContainer}>
-					{typeDetails.map((typeDetail) => {
-						// Fallback color in case getPokemonTypeColor returned null
-						const typeColor = typeDetail.color ?? theme.skeletonHighlight;
-						return (
-							// Use type name as key since slot might not be unique if typeDetails changes order later
-							<View
-								key={typeDetail.name}
-								style={[styles.typeBadge, { backgroundColor: typeColor }]}
-							>
-								<Text style={[styles.typeText, typeTextStyle]}>
-									{formatName(typeDetail.name)}
-								</Text>
-							</View>
-						);
-					})}
+					{pokemon.types.map((typeInfo) => (
+						<TypeBadge key={typeInfo.slot} typeName={typeInfo.type.name} />
+					))}
 				</View>
 			</View>
 		</View>
 	);
 };
 
-// Styles relevant to the header section
 const styles = StyleSheet.create({
 	headerContainer: {
 		alignItems: "center",
@@ -157,12 +136,11 @@ const styles = StyleSheet.create({
 		justifyContent: "center",
 		alignItems: "center",
 		backgroundColor: "#E0E0E0",
-		borderRadius: 60,
+		borderRadius: 75,
 	},
 	name: {
 		fontSize: 24,
 		fontWeight: "bold",
-		textTransform: "capitalize",
 		marginBottom: 4,
 		textAlign: "center",
 	},
@@ -175,17 +153,6 @@ const styles = StyleSheet.create({
 		flexWrap: "wrap",
 		justifyContent: "center",
 		marginBottom: 15,
-	},
-	typeBadge: {
-		paddingHorizontal: 10,
-		paddingVertical: 3,
-		borderRadius: 15,
-		margin: 3,
-	},
-	typeText: {
-		fontSize: 11,
-		fontWeight: "bold",
-		textTransform: "uppercase",
 	},
 	contentContainer: {
 		alignItems: "center",

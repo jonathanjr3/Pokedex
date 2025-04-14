@@ -1,11 +1,11 @@
-import React, { useCallback } from "react";
-import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
-import type { Pokemon, PokemonType } from "pokenode-ts";
-import { useTheme } from "../hooks/useTheme";
 import { useNavigation } from "@react-navigation/native";
+import type { Pokemon, PokemonType } from "pokenode-ts";
+import React, { useCallback } from "react";
+import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useTheme } from "../hooks/useTheme";
 import type { PokemonListNavigationProp } from "../navigation/types";
-import { getPokemonTypeColor } from "../utils/PokemonTypeColors";
 import { formatName } from "../utils/StringHelpers";
+import { TypeBadge } from "./PokemonTypeBadge";
 
 interface Props {
 	pokemon: Pokemon;
@@ -67,21 +67,9 @@ const PokemonListItem: React.FC<Props> = ({ pokemon }) => {
 			</Text>
 
 			<View style={styles.typesContainer}>
-				{pokemon.types.map((typeInfo: PokemonType, index: number) => {
-					const typeName = typeInfo.type.name;
-					const typeColor = getPokemonTypeColor(typeName);
-					const textColor = theme.card;
-					return (
-						<View
-							key={index}
-							style={[styles.typeBadge, { backgroundColor: typeColor }]}
-						>
-							<Text style={[styles.typeText, { color: textColor }]}>
-								{formatName(typeName)}
-							</Text>
-						</View>
-					);
-				})}
+				{pokemon.types.map((typeInfo: PokemonType, index: number) => (
+					<TypeBadge key={index} typeName={typeInfo.type.name} />
+				))}
 			</View>
 		</TouchableOpacity>
 	);
@@ -144,17 +132,6 @@ const styles = StyleSheet.create({
 		flexWrap: "wrap",
 		justifyContent: "center",
 		minHeight: 22, // Reserve space even if no types yet, prevents jump
-	},
-	typeBadge: {
-		paddingHorizontal: 8,
-		paddingVertical: 3,
-		borderRadius: 10,
-		marginHorizontal: 2,
-		marginVertical: 2,
-	},
-	typeText: {
-		fontSize: 10,
-		fontWeight: "bold",
 	},
 });
 
