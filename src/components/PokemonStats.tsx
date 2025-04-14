@@ -92,6 +92,7 @@ const formatStatName = (name: string): string => {
 };
 
 const calculateMaxStatValue = (baseStat: number, statName: string): number => {
+	// Source: https://pokemondb.net/pokebase/6506/there-formula-for-working-pokemons-highest-possible-stats
 	if (statName === "hp") {
 		// HP Formula: BaseStat × 2 + 204
 		return baseStat * 2 + 204;
