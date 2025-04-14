@@ -98,3 +98,4 @@ This is one way to run your app — you can also build it directly from Android 
 - [Pokenode-ts](https://github.com/Gabb-c/pokenode-ts) (Used this package to fetch data from pokeapi)
 - [Pokedex](https://www.pokemon.com/uk/pokedex) (Used as reference for the grid design on list screen)
 - [Pokemondb](https://pokemondb.net/pokebase/6506/there-formula-for-working-pokemons-highest-possible-stats) (Used formula mentioned here for calculating max value of a stat)
+- [IconKitchen](https://icon.kitchen/) (Used to generate app icons)
