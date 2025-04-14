@@ -1,0 +1,25 @@
+version: 2
+updates:
+  # Keep npm dependencies (TypeScript, JavaScript, React Native libraries) up-to-date
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+
+  # Keep Kotlin dependencies (Android-specific, for React Native) up-to-date
+  - package-ecosystem: "gradle"
+    directory: "/android"
+    schedule:
+      interval: "weekly"
+
+  # Keep Swift dependencies (iOS-specific, for React Native) up-to-date
+  - package-ecosystem: "swift"
+    directory: "/ios"
+    schedule:
+      interval: "weekly"
+
+  # Optionally, update GitHub Actions workflows (if workflows are used)
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
