@@ -1,8 +1,13 @@
 # Pokedex
 
 A react native app to search for pokemons and view it's details
+## Features
+- Search for pokemons by their name or national pokedex number.
+- View details of pokemons.
+- Supports dark and light mode.
+- Optimised for landscape mode as well.
 
-# Getting Started
+## Getting Started
 
 > **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
 
@@ -36,6 +41,8 @@ yarn android
 
 ### iOS
 
+### 🚧 **This project has not been tested on iOS yet** 🚧
+
 For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
 
 The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
@@ -63,3 +70,31 @@ yarn ios
 If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
 
 This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+
+# Screenshots (Android)
+
+## Pokemon list & search
+<img src="android_screenshots/Screenshot_1744573053.png" width="250" alt="pokemon list">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<img src="android_screenshots/Screenshot_1744573078.png" width="250" alt="pokemon search">
+
+## Pokemon details
+<img src="android_screenshots/Screenshot_1744573006.png" width="250" alt="pokemon details">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<img src="android_screenshots/Screenshot_1744573014.png" width="250" alt="pokemon details">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<img src="android_screenshots/Screenshot_1744573036.png" height="250" alt="pokemon details landscape">
+
+## Landscape mode on large screens
+### Pixel 9 Pro Fold (emulator):
+<img src="android_screenshots/Screenshot_1744576702.png" width="350" alt="pokemon details large landscape">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<img src="android_screenshots/Screenshot_1744576759.png" width="350" alt="pokemon details large landscape">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<img src="android_screenshots/Screenshot_1744576763.png" width="350" alt="pokemon details large landscape">
+
+## Light mode
+<img src="android_screenshots/Screenshot_1744573242.png" width="250" alt="pokemon details">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<img src="android_screenshots/Screenshot_1744573249.png" width="250" alt="pokemon details">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<img src="android_screenshots/Screenshot_1744573265.png" width="250" alt="pokemon details landscape">
+
+## References
+- [PokeAPI](https://pokeapi.co/docs/v2)
+- [Pokenode-ts](https://github.com/Gabb-c/pokenode-ts) (Used this package to fetch data from pokeapi)
+- [Pokedex](https://www.pokemon.com/uk/pokedex) (Used as reference for the grid design on list screen)
+- [Pokemondb](https://pokemondb.net/pokebase/6506/there-formula-for-working-pokemons-highest-possible-stats) (Used formula mentioned here for calculating max value of a stat)
