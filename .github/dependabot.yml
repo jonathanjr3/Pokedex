@@ -11,9 +11,3 @@ updates:
     directory: "/android"
     schedule:
       interval: "weekly"
-
-  # CocoaPods dependency updates
-  - package-ecosystem: "cocoapods"
-    directory: "/ios"
-    schedule:
-      interval: "weekly"
