@@ -1,24 +1,24 @@
-import type React from 'react';
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import type React from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import {
-    View,
-    Text,
-    StyleSheet,
-    ActivityIndicator,
-    Button,
-    SafeAreaView,
-    useWindowDimensions,
-    TextInput,
-    TouchableOpacity,
-} from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { FlashList } from '@shopify/flash-list';
-import type { Pokemon, NamedAPIResource } from 'pokenode-ts';
-import apiClient from '../api/PokeClient';
-import { useTheme } from '../hooks/useTheme';
-import PokemonListItem from '../components/PokemonListItem';
-import { useDebounce } from '../hooks/useDebounce';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+	View,
+	Text,
+	StyleSheet,
+	ActivityIndicator,
+	Button,
+	SafeAreaView,
+	useWindowDimensions,
+	TextInput,
+	TouchableOpacity,
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { FlashList } from "@shopify/flash-list";
+import type { Pokemon, NamedAPIResource } from "pokenode-ts";
+import apiClient from "../api/PokeClient";
+import { useTheme } from "../hooks/useTheme";
+import PokemonListItem from "../components/PokemonListItem";
+import { useDebounce } from "../hooks/useDebounce";
+import Icon from "react-native-vector-icons/MaterialIcons";
 
 // Configuration
 const TOTAL_POKEMON_COUNT = 1302; // Approximate total count
@@ -29,460 +29,507 @@ const SEARCH_DEBOUNCE_DELAY = 300; // milliseconds
 
 // Helper to extract ID from URL
 const extractIdFromUrl = (url: string): number | null => {
-    try {
-        const parts = url.split('/').filter(Boolean);
-        const id = parts.pop();
-        return id ? Number.parseInt(id, 10) : null;
-    } catch (e) {
-        return null;
-    }
+	try {
+		const parts = url.split("/").filter(Boolean);
+		const id = parts.pop();
+		return id ? Number.parseInt(id, 10) : null;
+	} catch (e) {
+		return null;
+	}
 };
 
 const PokemonListScreen: React.FC = () => {
-    // State
-    const [displayedPokemon, setDisplayedPokemon] = useState<Pokemon[]>([]); // List with full details for UI
-    const [loadingInitialList, setLoadingInitialList] = useState<boolean>(true); // Loading full name list
-    const [loadingPageDetails, setLoadingPageDetails] = useState<boolean>(false); // Loading details for a page
-    const [error, setError] = useState<string | null>(null);
-    const [currentPage, setCurrentPage] = useState<number>(0); // Current page index for detail fetching
-    const [canLoadMoreDetails, setCanLoadMoreDetails] = useState<boolean>(false);
-    const [searchQuery, setSearchQuery] = useState<string>('');
+	// State
+	const [displayedPokemon, setDisplayedPokemon] = useState<Pokemon[]>([]); // List with full details for UI
+	const [loadingInitialList, setLoadingInitialList] = useState<boolean>(true); // Loading full name list
+	const [loadingPageDetails, setLoadingPageDetails] = useState<boolean>(false); // Loading details for a page
+	const [error, setError] = useState<string | null>(null);
+	const [currentPage, setCurrentPage] = useState<number>(0); // Current page index for detail fetching
+	const [canLoadMoreDetails, setCanLoadMoreDetails] = useState<boolean>(false);
+	const [searchQuery, setSearchQuery] = useState<string>("");
 
-    // Refs
-    const allPokemonNamesRef = useRef<NamedAPIResource[]>([]); // Store the full list of names/URLs
-    const initialLoadComplete = useRef<boolean>(false); // Track if initial names + page 0 details are loaded
+	// Refs
+	const allPokemonNamesRef = useRef<NamedAPIResource[]>([]); // Store the full list of names/URLs
+	const initialLoadComplete = useRef<boolean>(false); // Track if initial names + page 0 details are loaded
 
-    // Hooks
-    const theme = useTheme();
-    const insets = useSafeAreaInsets();
-    const { width, height } = useWindowDimensions();
-    const debouncedSearchQuery = useDebounce(searchQuery, SEARCH_DEBOUNCE_DELAY);
+	// Hooks
+	const theme = useTheme();
+	const insets = useSafeAreaInsets();
+	const { width, height } = useWindowDimensions();
+	const debouncedSearchQuery = useDebounce(searchQuery, SEARCH_DEBOUNCE_DELAY);
 
-    // Define styles inside the component to access theme
-    const styles = StyleSheet.create({
-        background: {
-            backgroundColor: theme.background,
-            flex: 1,
-        },
-        container: {
-            flex: 1,
-            paddingTop: 10,
-            paddingBottom: insets.bottom,
-            paddingHorizontal: LIST_HORIZONTAL_PADDING + Math.max(insets.left, insets.right),
-        },
-        centerContainer: {
-            flex: 1,
-            justifyContent: 'center',
-            alignItems: 'center',
-        },
-        centerContainerFlex: {
-            flex: 1,
-            justifyContent: 'center',
-            alignItems: 'center',
-            padding: 20,
-            minHeight: 300,
-        },
-        footerContainer: {
-            paddingVertical: 20,
-            alignItems: 'center',
-            width: '100%',
-        },
-        inlineErrorText: {
-            fontSize: 14,
-            textAlign: 'center',
-            marginBottom: 10,
-        },
-        errorText: {
-            fontSize: 16,
-            textAlign: 'center',
-            marginBottom: 15,
-        },
-        searchInputContainer: {
-            flexDirection: 'row',
-            alignItems: 'center',
-            height: 40,
-            borderWidth: 1,
-            borderColor: theme.border,
-            borderRadius: 8,
-            paddingHorizontal: 10,
-            marginBottom: 10,
-            backgroundColor: theme.card,
-        },
-        searchIcon: {
-            marginRight: 8,
-        },
-        searchInput: {
-            flex: 1,
-            height: '100%',
-            fontSize: 16,
-            color: theme.text,
-            borderWidth: 0,
-            backgroundColor: 'transparent',
-            paddingVertical: 0,
-        },
-        clearIcon: {
-            marginLeft: 8,
-            padding: 2,
-        },
-    });
-    const backgroundStyle = styles.background;
-    const containerStyle = styles.container;
-    const textColor = { color: theme.text };
+	// Define styles inside the component to access theme
+	const styles = StyleSheet.create({
+		background: {
+			backgroundColor: theme.background,
+			flex: 1,
+		},
+		container: {
+			flex: 1,
+			paddingTop: 10,
+			paddingBottom: insets.bottom,
+			paddingHorizontal:
+				LIST_HORIZONTAL_PADDING + Math.max(insets.left, insets.right),
+		},
+		centerContainer: {
+			flex: 1,
+			justifyContent: "center",
+			alignItems: "center",
+		},
+		centerContainerFlex: {
+			flex: 1,
+			justifyContent: "center",
+			alignItems: "center",
+			padding: 20,
+			minHeight: 300,
+		},
+		footerContainer: {
+			paddingVertical: 20,
+			alignItems: "center",
+			width: "100%",
+		},
+		inlineErrorText: {
+			fontSize: 14,
+			textAlign: "center",
+			marginBottom: 10,
+		},
+		errorText: {
+			fontSize: 16,
+			textAlign: "center",
+			marginBottom: 15,
+		},
+		searchInputContainer: {
+			flexDirection: "row",
+			alignItems: "center",
+			height: 40,
+			borderWidth: 1,
+			borderColor: theme.border,
+			borderRadius: 8,
+			paddingHorizontal: 10,
+			marginBottom: 10,
+			backgroundColor: theme.card,
+		},
+		searchIcon: {
+			marginRight: 8,
+		},
+		searchInput: {
+			flex: 1,
+			height: "100%",
+			fontSize: 16,
+			color: theme.text,
+			borderWidth: 0,
+			backgroundColor: "transparent",
+			paddingVertical: 0,
+		},
+		clearIcon: {
+			marginLeft: 8,
+			padding: 2,
+		},
+	});
+	const backgroundStyle = styles.background;
+	const containerStyle = styles.container;
+	const textColor = { color: theme.text };
 
-    // --- Search and Filtering Logic --- 
-    const filteredPokemonNames = useMemo(() => {
-        const allNames = allPokemonNamesRef.current;
-        const query = debouncedSearchQuery.trim().toLowerCase();
+	// --- Search and Filtering Logic ---
+	const filteredPokemonNames = useMemo(() => {
+		const allNames = allPokemonNamesRef.current;
+		const query = debouncedSearchQuery.trim().toLowerCase();
 
-        if (!query) {
-            return allNames; // Return all if query is empty
-        }
+		if (!query) {
+			return allNames; // Return all if query is empty
+		}
 
-        const queryAsNumber = Number.parseInt(query, 10);
-        const isNumericQuery = !Number.isNaN(queryAsNumber);
-        let exactMatch: NamedAPIResource | null = null;
+		const queryAsNumber = Number.parseInt(query, 10);
+		const isNumericQuery = !Number.isNaN(queryAsNumber);
+		let exactMatch: NamedAPIResource | null = null;
 
-        const filtered = allNames.filter(pokemon => {
-            const nameMatch = pokemon.name.toLowerCase().includes(query);
-            const id = extractIdFromUrl(pokemon.url);
-            const idString = id?.toString();
-            let idMatch = false;
+		const filtered = allNames.filter((pokemon) => {
+			const nameMatch = pokemon.name.toLowerCase().includes(query);
+			const id = extractIdFromUrl(pokemon.url);
+			const idString = id?.toString();
+			let idMatch = false;
 
-            if (idString) {
-                // Check for exact numeric match
-                if (isNumericQuery && id === queryAsNumber) {
-                    exactMatch = pokemon;
-                    idMatch = true;
-                } else if (idString.includes(query)) {
-                    // Check for partial numeric match (if not exact)
-                    idMatch = true;
-                }
-            }
-            return nameMatch || idMatch;
-        });
+			if (idString) {
+				// Check for exact numeric match
+				if (isNumericQuery && id === queryAsNumber) {
+					exactMatch = pokemon;
+					idMatch = true;
+				} else if (idString.includes(query)) {
+					// Check for partial numeric match (if not exact)
+					idMatch = true;
+				}
+			}
+			return nameMatch || idMatch;
+		});
 
-        // Sort results: exact numeric match first, then by ID ascending
-        return filtered.sort((a, b) => {
-            if (exactMatch) {
-                if (a === exactMatch) return -1; // Exact match comes first
-                if (b === exactMatch) return 1;
-            }
-            const idA = extractIdFromUrl(a.url) ?? Number.POSITIVE_INFINITY;
-            const idB = extractIdFromUrl(b.url) ?? Number.POSITIVE_INFINITY;
-            return idA - idB;
-        });
+		// Sort results: exact numeric match first, then by ID ascending
+		return filtered.sort((a, b) => {
+			if (exactMatch) {
+				if (a === exactMatch) return -1; // Exact match comes first
+				if (b === exactMatch) return 1;
+			}
+			const idA = extractIdFromUrl(a.url) ?? Number.POSITIVE_INFINITY;
+			const idB = extractIdFromUrl(b.url) ?? Number.POSITIVE_INFINITY;
+			return idA - idB;
+		});
+	}, [debouncedSearchQuery]); // Re-filter when debounced query changes
 
-    }, [debouncedSearchQuery]); // Re-filter when debounced query changes
+	// --- Data Fetching Logic ---
 
-    // --- Data Fetching Logic --- 
+	// Fetch details for a specific page based on the *provided* name list (filtered or full)
+	const fetchPokemonDetailsForPage = useCallback(
+		async (page: number, namesList: NamedAPIResource[], isRetry = false) => {
+			const startIndex = page * DETAILS_PAGE_LIMIT;
+			const endIndex = startIndex + DETAILS_PAGE_LIMIT;
+			const namesToFetch = namesList.slice(startIndex, endIndex);
 
-    // Fetch details for a specific page based on the *provided* name list (filtered or full)
-    const fetchPokemonDetailsForPage = useCallback(async (page: number, namesList: NamedAPIResource[], isRetry = false) => {
+			if (namesToFetch.length === 0) {
+				setCanLoadMoreDetails(false);
+				if (loadingPageDetails) setLoadingPageDetails(false);
+				if (page === 0 && loadingInitialList) setLoadingInitialList(false);
+				return;
+			}
 
-        const startIndex = page * DETAILS_PAGE_LIMIT;
-        const endIndex = startIndex + DETAILS_PAGE_LIMIT;
-        const namesToFetch = namesList.slice(startIndex, endIndex);
+			// Prevent concurrent fetches manually
+			if (loadingPageDetails && !isRetry) {
+				console.log("Already loading page details, skipping fetch.");
+				return;
+			}
 
-        if (namesToFetch.length === 0) {
-            setCanLoadMoreDetails(false);
-            if (loadingPageDetails) setLoadingPageDetails(false);
-            if (page === 0 && loadingInitialList) setLoadingInitialList(false);
-            return;
-        }
+			console.log(
+				`Fetching details for page ${page} (indices ${startIndex}-${endIndex - 1}). Count: ${namesToFetch.length}`,
+			);
+			setLoadingPageDetails(true);
+			setError(null);
 
-        // Prevent concurrent fetches manually
-        if (loadingPageDetails && !isRetry) {
-            console.log("Already loading page details, skipping fetch.");
-            return;
-        }
+			let pageFetchSuccess = false; // Track success for state updates
 
-        console.log(`Fetching details for page ${page} (indices ${startIndex}-${endIndex - 1}). Count: ${namesToFetch.length}`);
-        setLoadingPageDetails(true);
-        setError(null);
+			try {
+				const detailPromises = namesToFetch.map((item) =>
+					apiClient.getPokemonByName(item.name),
+				);
+				const detailedPokemon = await Promise.all(detailPromises);
 
-        let pageFetchSuccess = false; // Track success for state updates
+				setDisplayedPokemon((prevList) => {
+					if (page === 0) {
+						return detailedPokemon; // Replace for page 0
+					}
+					const existingIds = new Set(prevList.map((p) => p.id));
+					const newItems = detailedPokemon.filter(
+						(newItem) => !existingIds.has(newItem.id),
+					);
+					return [...prevList, ...newItems]; // Append for subsequent pages
+				});
 
-        try {
-            const detailPromises = namesToFetch.map(item => apiClient.getPokemonByName(item.name));
-            const detailedPokemon = await Promise.all(detailPromises);
+				setCurrentPage(page + 1);
+				setCanLoadMoreDetails(endIndex < namesList.length);
+				pageFetchSuccess = true;
+			} catch (err) {
+				console.error(`Failed to fetch details for page ${page}:`, err);
+				setError("Failed to load more Pokemon details. Please try again.");
+				pageFetchSuccess = false; // Ensure canLoadMore isn't incorrectly true
+				setCanLoadMoreDetails(false);
+			} finally {
+				setLoadingPageDetails(false);
+				if (page === 0) {
+					console.log(
+						"Finished processing page 0. Setting initialLoadComplete to true.",
+					);
+					setLoadingInitialList(false);
+					initialLoadComplete.current = true; // Mark initial load as complete
+					if (!pageFetchSuccess) {
+						setCanLoadMoreDetails(false);
+					}
+				}
+			}
+		},
+		[],
+	);
 
-            setDisplayedPokemon((prevList) => {
-                if (page === 0) {
-                    return detailedPokemon; // Replace for page 0
-                }
-                const existingIds = new Set(prevList.map(p => p.id));
-                const newItems = detailedPokemon.filter(newItem => !existingIds.has(newItem.id));
-                return [...prevList, ...newItems]; // Append for subsequent pages
-            });
+	// --- Recalculate pagination based on filtered list OR when search is cleared ---
+	useEffect(() => {
+		// Only run AFTER initial load (names + page 0) is fully complete
+		if (!initialLoadComplete.current) {
+			return;
+		}
 
-            setCurrentPage(page + 1);
-            setCanLoadMoreDetails(endIndex < namesList.length);
-            pageFetchSuccess = true;
+		// This effect now runs *only* when the debounced query changes after initial load.
+		console.log(`Search effect running for query: '${debouncedSearchQuery}'`);
 
-        } catch (err) {
-            console.error(`Failed to fetch details for page ${page}:`, err);
-            setError('Failed to load more Pokemon details. Please try again.');
-            pageFetchSuccess = false; // Ensure canLoadMore isn't incorrectly true
-            setCanLoadMoreDetails(false);
-        } finally {
-            setLoadingPageDetails(false);
-            if (page === 0) {
-                console.log("Finished processing page 0. Setting initialLoadComplete to true.");
-                setLoadingInitialList(false);
-                initialLoadComplete.current = true; // Mark initial load as complete
-                if (!pageFetchSuccess) {
-                    setCanLoadMoreDetails(false);
-                }
-            }
-        }
-    }, []);
+		const targetNameList = debouncedSearchQuery
+			? filteredPokemonNames
+			: allPokemonNamesRef.current;
 
-    // --- Recalculate pagination based on filtered list OR when search is cleared --- 
-    useEffect(() => {
-        // Only run AFTER initial load (names + page 0) is fully complete
-        if (!initialLoadComplete.current) {
-            return;
-        }
+		// Reset state for the new search/clear
+		setCurrentPage(0);
+		setDisplayedPokemon([]);
+		const newCanLoadMore = targetNameList.length > DETAILS_PAGE_LIMIT;
+		setCanLoadMoreDetails(newCanLoadMore);
 
-        // This effect now runs *only* when the debounced query changes after initial load.
-        console.log(`Search effect running for query: '${debouncedSearchQuery}'`);
+		if (targetNameList.length > 0) {
+			console.log(
+				`Fetching page 0 for target list (size: ${targetNameList.length})`,
+			);
+			fetchPokemonDetailsForPage(0, targetNameList);
+		} else {
+			console.log("Target list empty, not fetching page 0.");
+			setCanLoadMoreDetails(false);
+		}
 
-        const targetNameList = debouncedSearchQuery ? filteredPokemonNames : allPokemonNamesRef.current;
+		// Depend only on the debounced query value and the stable fetcher function.
+		// This prevents the effect from running just because the initial names ref was populated.
+	}, [debouncedSearchQuery, fetchPokemonDetailsForPage]);
 
-        // Reset state for the new search/clear
-        setCurrentPage(0);
-        setDisplayedPokemon([]);
-        const newCanLoadMore = targetNameList.length > DETAILS_PAGE_LIMIT;
-        setCanLoadMoreDetails(newCanLoadMore);
+	// Fetch the FULL list of names initially
+	const fetchFullPokemonList = useCallback(async () => {
+		console.log("Starting to fetch all Pokemon names...");
+		initialLoadComplete.current = false; // Reset flag on new fetch
+		setLoadingInitialList(true);
+		setError(null);
+		setDisplayedPokemon([]);
+		setCurrentPage(0);
+		setSearchQuery("");
+		allPokemonNamesRef.current = [];
 
-        if (targetNameList.length > 0) {
-            console.log(`Fetching page 0 for target list (size: ${targetNameList.length})`);
-            fetchPokemonDetailsForPage(0, targetNameList);
-        } else {
-            console.log("Target list empty, not fetching page 0.");
-            setCanLoadMoreDetails(false);
-        }
+		try {
+			console.log(
+				`Attempting to fetch ${TOTAL_POKEMON_COUNT} names at once...`,
+			);
+			const data = await apiClient.listPokemons(0, TOTAL_POKEMON_COUNT);
+			console.log(`Fetched ${data.results.length} names.`);
 
-        // Depend only on the debounced query value and the stable fetcher function.
-        // This prevents the effect from running just because the initial names ref was populated.
-    }, [debouncedSearchQuery, fetchPokemonDetailsForPage]);
+			if (data.results && data.results.length > 0) {
+				allPokemonNamesRef.current = data.results;
+				setCanLoadMoreDetails(true);
+				// Restore the direct call to fetch page 0 after names are loaded
+				console.log("Name fetch complete. Fetching details for page 0...");
+				await fetchPokemonDetailsForPage(0, allPokemonNamesRef.current);
+			} else {
+				setCanLoadMoreDetails(false);
+				setLoadingInitialList(false);
+			}
+		} catch (err) {
+			console.error("Failed to fetch all Pokemon names:", err);
+			setError("Failed to load the initial Pokemon list. Please try again.");
+			allPokemonNamesRef.current = [];
+			setDisplayedPokemon([]);
+			setLoadingInitialList(false);
+		}
+	}, [fetchPokemonDetailsForPage]);
 
-    // Fetch the FULL list of names initially
-    const fetchFullPokemonList = useCallback(async () => {
-        console.log('Starting to fetch all Pokemon names...');
-        initialLoadComplete.current = false; // Reset flag on new fetch
-        setLoadingInitialList(true);
-        setError(null);
-        setDisplayedPokemon([]);
-        setCurrentPage(0);
-        setSearchQuery('');
-        allPokemonNamesRef.current = [];
+	// --- Effects ---
 
-        try {
-            console.log(`Attempting to fetch ${TOTAL_POKEMON_COUNT} names at once...`);
-            const data = await apiClient.listPokemons(0, TOTAL_POKEMON_COUNT);
-            console.log(`Fetched ${data.results.length} names.`);
+	// Initial fetch trigger
+	useEffect(() => {
+		// This runs only once on mount to kick things off
+		fetchFullPokemonList();
+	}, [fetchFullPokemonList]); // Depends on the memoized fetchFullPokemonList
 
-            if (data.results && data.results.length > 0) {
-                allPokemonNamesRef.current = data.results;
-                setCanLoadMoreDetails(true);
-                // Restore the direct call to fetch page 0 after names are loaded
-                console.log("Name fetch complete. Fetching details for page 0...");
-                await fetchPokemonDetailsForPage(0, allPokemonNamesRef.current);
-            } else {
-                setCanLoadMoreDetails(false);
-                setLoadingInitialList(false);
-            }
-        } catch (err) {
-            console.error("Failed to fetch all Pokemon names:", err);
-            setError('Failed to load the initial Pokemon list. Please try again.');
-            allPokemonNamesRef.current = [];
-            setDisplayedPokemon([]);
-            setLoadingInitialList(false);
-        }
-    }, [fetchPokemonDetailsForPage]);
+	// Dynamic Column Calculation
+	const calculateNumColumns = useCallback(() => {
+		const availableWidth =
+			width - LIST_HORIZONTAL_PADDING * 2 - (insets.left + insets.right);
+		const effectiveItemWidth = DESIRED_ITEM_WIDTH + 10;
+		const calculatedCols = Math.floor(availableWidth / effectiveItemWidth);
+		return Math.max(1, calculatedCols); // Ensure at least 1 column
+	}, [width, insets.left, insets.right]);
 
-    // --- Effects --- 
+	const numColumns = calculateNumColumns();
 
-    // Initial fetch trigger
-    useEffect(() => {
-        // This runs only once on mount to kick things off
-        fetchFullPokemonList();
-    }, [fetchFullPokemonList]); // Depends on the memoized fetchFullPokemonList
+	// --- Event Handlers ---
+	const handleLoadMore = useCallback(() => {
+		if (canLoadMoreDetails && !loadingPageDetails) {
+			console.log(
+				"handleLoadMore: Fetching next page details for filtered list.",
+			);
+			const listToPaginate = debouncedSearchQuery
+				? filteredPokemonNames // Use filtered list if search is active
+				: allPokemonNamesRef.current; // Use full list otherwise
+			if (listToPaginate.length > currentPage * DETAILS_PAGE_LIMIT) {
+				fetchPokemonDetailsForPage(currentPage, listToPaginate);
+			} else {
+				console.log(
+					"handleLoadMore: Calculated that no more items exist for the current list.",
+				);
+				setCanLoadMoreDetails(false);
+			}
+		}
+		// dependencies, include things that determine *which* list to use or *if* loading can happen
+	}, [
+		canLoadMoreDetails,
+		loadingPageDetails,
+		currentPage,
+		debouncedSearchQuery, // Determines which list to use
+		filteredPokemonNames, // Needed if query is active
+		fetchPokemonDetailsForPage,
+	]);
 
-    // Dynamic Column Calculation
-    const calculateNumColumns = useCallback(() => {
-        const availableWidth = width - (LIST_HORIZONTAL_PADDING * 2) - (insets.left + insets.right);
-        const effectiveItemWidth = DESIRED_ITEM_WIDTH + 10;
-        const calculatedCols = Math.floor(availableWidth / effectiveItemWidth);
-        return Math.max(1, calculatedCols); // Ensure at least 1 column
-    }, [width, insets.left, insets.right]);
+	const handleRetryLoadMore = () => {
+		if (!loadingPageDetails) {
+			const listToRetry = debouncedSearchQuery
+				? filteredPokemonNames
+				: allPokemonNamesRef.current;
+			console.log(
+				"Retrying load more details for page:",
+				currentPage,
+				"using list size:",
+				listToRetry.length,
+			);
+			// Reset error before retry
+			setError(null);
+			// Reset canLoadMore based on the list we are retrying
+			setCanLoadMoreDetails(
+				listToRetry.length > currentPage * DETAILS_PAGE_LIMIT,
+			);
+			fetchPokemonDetailsForPage(currentPage, listToRetry, true);
+		}
+	};
 
-    const numColumns = calculateNumColumns();
+	const handleRetryInitialLoad = () => {
+		console.log("Retrying initial full list load");
+		fetchFullPokemonList();
+	};
 
-    // --- Event Handlers --- 
-    const handleLoadMore = useCallback(() => {
-        if (canLoadMoreDetails && !loadingPageDetails) {
-            console.log("handleLoadMore: Fetching next page details for filtered list.");
-            const listToPaginate = debouncedSearchQuery
-                ? filteredPokemonNames // Use filtered list if search is active
-                : allPokemonNamesRef.current; // Use full list otherwise
-            if (listToPaginate.length > currentPage * DETAILS_PAGE_LIMIT) {
-                fetchPokemonDetailsForPage(currentPage, listToPaginate);
-            } else {
-                console.log("handleLoadMore: Calculated that no more items exist for the current list.");
-                setCanLoadMoreDetails(false);
-            }
-        }
-        // dependencies, include things that determine *which* list to use or *if* loading can happen
-    }, [
-        canLoadMoreDetails,
-        loadingPageDetails,
-        currentPage,
-        debouncedSearchQuery, // Determines which list to use
-        filteredPokemonNames, // Needed if query is active
-        fetchPokemonDetailsForPage
-    ]);
+	const handleClearSearch = () => {
+		setSearchQuery("");
+	};
 
-    const handleRetryLoadMore = () => {
-        if (!loadingPageDetails) {
-            const listToRetry = debouncedSearchQuery
-                ? filteredPokemonNames
-                : allPokemonNamesRef.current;
-            console.log("Retrying load more details for page:", currentPage, "using list size:", listToRetry.length);
-            // Reset error before retry
-            setError(null);
-            // Reset canLoadMore based on the list we are retrying
-            setCanLoadMoreDetails(listToRetry.length > currentPage * DETAILS_PAGE_LIMIT);
-            fetchPokemonDetailsForPage(currentPage, listToRetry, true);
-        }
-    };
+	// Render Functions
+	const renderItem = ({ item }: { item: Pokemon }) => (
+		<PokemonListItem pokemon={item} />
+	);
 
-    const handleRetryInitialLoad = () => {
-        console.log("Retrying initial full list load");
-        fetchFullPokemonList();
-    };
+	const renderFooter = () => {
+		if (error && !loadingPageDetails && displayedPokemon.length > 0) {
+			return (
+				<View style={styles.footerContainer}>
+					<Text style={[styles.inlineErrorText, { color: theme.notification }]}>
+						{error} {/* Show specific load more error */}
+					</Text>
+					<Button
+						title="Retry Load More"
+						onPress={handleRetryLoadMore}
+						color={theme.primary}
+					/>
+				</View>
+			);
+		}
+		if (loadingPageDetails) {
+			return (
+				<View style={styles.footerContainer}>
+					<ActivityIndicator size="small" color={theme.primary} />
+				</View>
+			);
+		}
+		// Base end of list message on the *filtered* list and whether more details can be loaded
+		if (
+			!canLoadMoreDetails &&
+			filteredPokemonNames.length > 0 &&
+			!loadingPageDetails &&
+			!error
+		) {
+			return (
+				<View style={styles.footerContainer}>
+					<Text style={textColor}>No more Pokémon to load.</Text>
+				</View>
+			);
+		}
+		return null;
+	};
 
-    const handleClearSearch = () => {
-        setSearchQuery('');
-    };
+	// Loading / Error States
+	if (loadingInitialList) {
+		return (
+			<SafeAreaView style={backgroundStyle}>
+				<View style={styles.centerContainer}>
+					<ActivityIndicator size="large" color={theme.primary} />
+					<Text style={[textColor, { marginTop: 10 }]}>
+						Loading Pokémon list...
+					</Text>
+				</View>
+			</SafeAreaView>
+		);
+	}
 
-    // Render Functions
-    const renderItem = ({ item }: { item: Pokemon }) => (
-        <PokemonListItem pokemon={item} />
-    );
+	// Error during initial fetch OR first page fetch resulting in empty list
+	if (error && displayedPokemon.length === 0 && !loadingInitialList) {
+		return (
+			<SafeAreaView style={backgroundStyle}>
+				<View style={styles.centerContainer}>
+					<Text style={[styles.errorText, { color: theme.notification }]}>
+						{error}
+					</Text>
+					<Button
+						title="Retry Initial Load"
+						onPress={handleRetryInitialLoad}
+						color={theme.primary}
+					/>
+				</View>
+			</SafeAreaView>
+		);
+	}
 
-    const renderFooter = () => {
-        if (error && !loadingPageDetails && displayedPokemon.length > 0) {
-            return (
-                <View style={styles.footerContainer}>
-                    <Text style={[styles.inlineErrorText, { color: theme.notification }]}>
-                        {error} {/* Show specific load more error */}
-                    </Text>
-                    <Button title="Retry Load More" onPress={handleRetryLoadMore} color={theme.primary} />
-                </View>
-            );
-        }
-        if (loadingPageDetails) {
-            return (
-                <View style={styles.footerContainer}>
-                    <ActivityIndicator size="small" color={theme.primary} />
-                </View>
-            );
-        }
-        // Base end of list message on the *filtered* list and whether more details can be loaded
-        if (!canLoadMoreDetails && filteredPokemonNames.length > 0 && !loadingPageDetails && !error) {
-            return (
-                <View style={styles.footerContainer}>
-                    <Text style={textColor}>No more Pokémon to load.</Text>
-                </View>
-            );
-        }
-        return null;
-    };
+	// Main Render
+	return (
+		<SafeAreaView style={backgroundStyle}>
+			<View style={containerStyle}>
+				<View style={styles.searchInputContainer}>
+					<Icon
+						name="search"
+						size={20}
+						color={`${theme.text}80`}
+						style={styles.searchIcon}
+					/>
+					<TextInput
+						style={styles.searchInput}
+						placeholder="Search by Name or Pokédex Number"
+						placeholderTextColor={`${theme.text}80`}
+						value={searchQuery}
+						onChangeText={setSearchQuery}
+						autoCapitalize="none"
+						autoCorrect={false}
+					/>
+					{searchQuery.length > 0 && (
+						<TouchableOpacity onPress={handleClearSearch} hitSlop={10}>
+							<Icon
+								name="cancel"
+								size={20}
+								color={`${theme.text}80`}
+								style={styles.clearIcon}
+							/>
+						</TouchableOpacity>
+					)}
+				</View>
 
-    // Loading / Error States
-    if (loadingInitialList) {
-        return (
-            <SafeAreaView style={backgroundStyle}>
-                <View style={styles.centerContainer}>
-                    <ActivityIndicator size="large" color={theme.primary} />
-                    <Text style={[textColor, { marginTop: 10 }]}>Loading Pokémon list...</Text>
-                </View>
-            </SafeAreaView>
-        );
-    }
-
-    // Error during initial fetch OR first page fetch resulting in empty list
-    if (error && displayedPokemon.length === 0 && !loadingInitialList) {
-        return (
-            <SafeAreaView style={backgroundStyle}>
-                <View style={styles.centerContainer}>
-                    <Text style={[styles.errorText, { color: theme.notification }]}>{error}</Text>
-                    <Button title="Retry Initial Load" onPress={handleRetryInitialLoad} color={theme.primary} />
-                </View>
-            </SafeAreaView>
-        );
-    }
-
-    // Main Render
-    return (
-        <SafeAreaView style={backgroundStyle}>
-            <View style={containerStyle}>
-                <View style={styles.searchInputContainer}>
-                    <Icon
-                        name="search"
-                        size={20}
-                        color={`${theme.text}80`}
-                        style={styles.searchIcon}
-                    />
-                    <TextInput
-                        style={styles.searchInput}
-                        placeholder="Search by Name or Pokédex Number"
-                        placeholderTextColor={`${theme.text}80`}
-                        value={searchQuery}
-                        onChangeText={setSearchQuery}
-                        autoCapitalize="none"
-                        autoCorrect={false}
-                    />
-                    {searchQuery.length > 0 && (
-                        <TouchableOpacity onPress={handleClearSearch} hitSlop={10}>
-                            <Icon
-                                name="cancel"
-                                size={20}
-                                color={`${theme.text}80`}
-                                style={styles.clearIcon}
-                            />
-                        </TouchableOpacity>
-                    )}
-                </View>
-
-                <FlashList
-                    numColumns={numColumns}
-                    data={displayedPokemon}
-                    renderItem={renderItem}
-                    keyExtractor={(item) => item.id.toString()}
-                    estimatedItemSize={220}
-                    onEndReached={handleLoadMore}
-                    onEndReachedThreshold={0.8}
-                    ListFooterComponent={renderFooter}
-                    ListEmptyComponent={
-                        // Show if not loading details, no error, and the *filtered* list is empty
-                        !loadingInitialList && !loadingPageDetails && !error && filteredPokemonNames.length === 0 ? (
-                            <View style={styles.centerContainerFlex}>
-                                <Text style={textColor}>No Pokémons matching your search.</Text>
-                            </View>
-                        ) : null // Otherwise, footer loader or content will show
-                    }
-                    removeClippedSubviews={true}
-                    drawDistance={height * 2}
-                    maintainVisibleContentPosition={{
-                        minIndexForVisible: 0,
-                    }}
-                />
-            </View>
-        </SafeAreaView>
-    );
+				<FlashList
+					numColumns={numColumns}
+					data={displayedPokemon}
+					renderItem={renderItem}
+					keyExtractor={(item) => item.id.toString()}
+					estimatedItemSize={220}
+					onEndReached={handleLoadMore}
+					onEndReachedThreshold={0.8}
+					ListFooterComponent={renderFooter}
+					ListEmptyComponent={
+						// Show if not loading details, no error, and the *filtered* list is empty
+						!loadingInitialList &&
+						!loadingPageDetails &&
+						!error &&
+						filteredPokemonNames.length === 0 ? (
+							<View style={styles.centerContainerFlex}>
+								<Text style={textColor}>No Pokémons matching your search.</Text>
+							</View>
+						) : null // Otherwise, footer loader or content will show
+					}
+					removeClippedSubviews={true}
+					drawDistance={height * 2}
+					maintainVisibleContentPosition={{
+						minIndexForVisible: 0,
+					}}
+				/>
+			</View>
+		</SafeAreaView>
+	);
 };
 
 export default PokemonListScreen;
