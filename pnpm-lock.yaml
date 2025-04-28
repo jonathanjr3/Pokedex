@@ -30,11 +30,11 @@ importers:
         specifier: ^1.8.4
         version: 1.8.4
       axios-cache-interceptor:
-        specifier: ^1.7.0
-        version: 1.7.0(axios@1.8.4)
+        specifier: ^1.8.0
+        version: 1.8.0(axios@1.8.4)
       pokenode-ts:
         specifier: ^1.20.0
-        version: 1.20.0(axios-cache-interceptor@1.7.0(axios@1.8.4))(axios@1.8.4)
+        version: 1.20.0(axios-cache-interceptor@1.8.0(axios@1.8.4))(axios@1.8.4)
       react:
         specifier: 19.0.0
         version: 19.0.0
@@ -1248,8 +1248,8 @@ packages:
   asynckit@0.4.0:
     resolution: {integrity: sha512-Oei9OH4tRh0YqU3GxhX79dM/mwVgvbZJaSNaRk+bshkj0S5cfHcgYakreBjrHwatXKbz+IoIdYLxrKim2MjW0Q==}
 
-  axios-cache-interceptor@1.7.0:
-    resolution: {integrity: sha512-SP/QpCApakyGncF7ttyGsKt0CK5XG+tsdGAGTumHTzO1acnn9v7bd1XK1LiIcyXp46mlKS8j5iwvhNyFFWUKZQ==}
+  axios-cache-interceptor@1.8.0:
+    resolution: {integrity: sha512-cTNnPGJyQkxnWp0EWvE3NRvgURU5cWw/Qx3dIhXyHSM4Ip0c7EEe0I3an0Jwa549m1CAOg57ibj27YRNLmQCcg==}
     engines: {node: '>=12'}
     peerDependencies:
       axios: ^1
@@ -4427,9 +4427,7 @@ snapshots:
       metro-runtime: 0.82.1
     transitivePeerDependencies:
       - '@babel/core'
-      - bufferutil
       - supports-color
-      - utf-8-validate
 
   '@react-native/normalize-colors@0.79.1': {}
 
@@ -4658,7 +4656,7 @@ snapshots:
 
   asynckit@0.4.0: {}
 
-  axios-cache-interceptor@1.7.0(axios@1.8.4):
+  axios-cache-interceptor@1.8.0(axios@1.8.4):
     dependencies:
       axios: 1.8.4
       cache-parser: 1.2.5
@@ -6161,10 +6159,10 @@ snapshots:
     dependencies:
       find-up: 4.1.0
 
-  pokenode-ts@1.20.0(axios-cache-interceptor@1.7.0(axios@1.8.4))(axios@1.8.4):
+  pokenode-ts@1.20.0(axios-cache-interceptor@1.8.0(axios@1.8.4))(axios@1.8.4):
     dependencies:
       axios: 1.8.4
-      axios-cache-interceptor: 1.7.0(axios@1.8.4)
+      axios-cache-interceptor: 1.8.0(axios@1.8.4)
 
   pretty-format@26.6.2:
     dependencies:
