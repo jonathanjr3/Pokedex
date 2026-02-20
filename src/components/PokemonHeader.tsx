@@ -1,8 +1,8 @@
-import { BlurView } from "@react-native-community/blur";
+import { BlurView } from "expo-blur";
 import type { Pokemon } from "pokenode-ts";
 import type React from "react";
 import { Image, StyleSheet, Text, View } from "react-native";
-import LinearGradient from "react-native-linear-gradient";
+import { LinearGradient } from "expo-linear-gradient";
 import { useTheme } from "../hooks/useTheme";
 import {
 	getPokemonTypeColor,
@@ -67,13 +67,14 @@ const PokemonHeader: React.FC<Props> = ({
 			]}
 		>
 			<LinearGradient
-				colors={calculatedGradientColors}
+				colors={calculatedGradientColors as [string, string, ...string[]]}
 				style={StyleSheet.absoluteFillObject}
 			/>
 			<BlurView
 				style={StyleSheet.absoluteFillObject}
-				blurType={blurType}
-				blurAmount={10}
+				tint={blurType}
+				intensity={10}
+				experimentalBlurMethod="dimezisBlurView"
 			/>
 			<View style={styles.contentContainer}>
 				{mainSprite ? (

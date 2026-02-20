@@ -1,4 +1,11 @@
 {
-  "name": "Pokedex",
-  "displayName": "Pokedex"
+  "expo": {
+    "name": "Pokedex",
+    "slug": "pokedex",
+    "version": "0.0.1",
+    "newArchEnabled": true,
+    "assetBundlePatterns": [
+      "**/*"
+    ]
+  }
 }

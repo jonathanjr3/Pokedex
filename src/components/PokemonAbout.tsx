@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import type React from "react";
 import { useMemo } from "react";
-import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { formatName } from "../utils/StringHelpers";
 
 // Styles
