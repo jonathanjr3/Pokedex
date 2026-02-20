@@ -73,7 +73,7 @@ const PokemonHeader: React.FC<Props> = ({
 			<BlurView
 				style={StyleSheet.absoluteFillObject}
 				tint={blurType}
-				intensity={10}
+				intensity={60}
 				experimentalBlurMethod="dimezisBlurView"
 			/>
 			<View style={styles.contentContainer}>
