@@ -6,11 +6,11 @@ import {
 	StyleSheet,
 	ActivityIndicator,
 	Button,
-	SafeAreaView,
 	useWindowDimensions,
 	TextInput,
 	TouchableOpacity,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { FlashList } from "@shopify/flash-list";
 import type { Pokemon, NamedAPIResource } from "pokenode-ts";
@@ -18,7 +18,7 @@ import apiClient from "../api/PokeClient";
 import { useTheme } from "../hooks/useTheme";
 import PokemonListItem from "../components/PokemonListItem";
 import { useDebounce } from "../hooks/useDebounce";
-import Icon from "react-native-vector-icons/MaterialIcons";
+import { MaterialIcons as Icon } from "@expo/vector-icons";
 
 // Configuration
 const TOTAL_POKEMON_COUNT = 1302; // Approximate total count
@@ -506,16 +506,15 @@ const PokemonListScreen: React.FC = () => {
 					data={displayedPokemon}
 					renderItem={renderItem}
 					keyExtractor={(item) => item.id.toString()}
-					estimatedItemSize={220}
 					onEndReached={handleLoadMore}
 					onEndReachedThreshold={0.8}
 					ListFooterComponent={renderFooter}
 					ListEmptyComponent={
 						// Show if not loading details, no error, and the *filtered* list is empty
 						!loadingInitialList &&
-						!loadingPageDetails &&
-						!error &&
-						filteredPokemonNames.length === 0 ? (
+							!loadingPageDetails &&
+							!error &&
+							filteredPokemonNames.length === 0 ? (
 							<View style={styles.centerContainerFlex}>
 								<Text style={textColor}>No Pokémons matching your search.</Text>
 							</View>
@@ -523,9 +522,6 @@ const PokemonListScreen: React.FC = () => {
 					}
 					removeClippedSubviews={true}
 					drawDistance={height * 2}
-					maintainVisibleContentPosition={{
-						minIndexForVisible: 0,
-					}}
 				/>
 			</View>
 		</SafeAreaView>
