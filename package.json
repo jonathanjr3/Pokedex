@@ -39,7 +39,7 @@
     "@react-native-community/cli-platform-android": "^18.0.1",
     "@react-native-community/cli-platform-ios": "^18.0.1",
     "@react-native/babel-preset": "^0.79.7",
-    "@react-native/codegen": "^0.79.7",
+    "@react-native/codegen": "^0.84.0",
     "@react-native/metro-config": "^0.79.7",
     "@react-native/typescript-config": "^0.79.7",
     "@testing-library/react-native": "^13.3.3",
